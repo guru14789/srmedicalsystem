@@ -1,0 +1,20 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  
+  # Disable MultiViews to prevent Apache from trying to guess files
+  # This avoids conflicts where a route name might match a folder/file
+  Options -MultiViews
+  
+  # If the request matches a file or directory, serve it.
+  RewriteCond %{REQUEST_FILENAME} -f [OR]
+  RewriteCond %{REQUEST_FILENAME} -d
+  RewriteRule ^ - [L]
+
+  # Redirect all other requests to /index.html
+  # Use absolute path /index.html to ensure it works from any subdirectory level
+  RewriteRule ^ /index.html [L]
+</IfModule>
+
+# Fallback for 404 errors to ensure the SPA always loads
+ErrorDocument 404 /index.html

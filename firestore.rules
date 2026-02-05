@@ -1,0 +1,116 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isAdmin() {
+      return isAuthenticated() && 
+             get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    function canUpdateUserProfile(userId) {
+      return isOwner(userId) && 
+             request.resource.data.role == resource.data.role;
+    }
+    
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isAuthenticated() && isOwner(userId) && 
+                       (!request.resource.data.keys().hasAny(['role']) || 
+                        request.resource.data.role == 'user' || 
+                        request.resource.data.role == 'customer');
+      allow update: if canUpdateUserProfile(userId) || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /products/{productId} {
+      allow read: if true;
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /orders/{orderId} {
+      allow read: if isAuthenticated();
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /cart/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId);
+    }
+    
+    match /payments/{paymentId} {
+      allow read: if isAuthenticated();
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() || isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /feedback/{feedbackId} {
+      allow read: if isAuthenticated();
+      allow list: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /shipments/{shipmentId} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.user_id == request.auth.uid || isAdmin());
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /contacts/{contactId} {
+      allow read: if isAdmin();
+      allow create: if true;
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /quotes/{quoteId} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.user_id == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /wishlists/{wishlistId} {
+      allow read: if isAuthenticated() && 
+                     (resource.data.user_id == request.auth.uid || isAdmin());
+      allow create: if isAuthenticated();
+      allow update: if isAuthenticated() && 
+                       (resource.data.user_id == request.auth.uid || isAdmin());
+      allow delete: if isAuthenticated() && 
+                       (resource.data.user_id == request.auth.uid || isAdmin());
+    }
+    
+    match /cart_history/{historyId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+    
+    match /settings/{settingId} {
+      allow read: if isAuthenticated();
+      allow create: if isAdmin();
+      allow update: if isAdmin();
+      allow delete: if isAdmin();
+    }
+  }
+}

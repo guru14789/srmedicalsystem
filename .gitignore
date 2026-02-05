@@ -1,0 +1,47 @@
+data/
+.local/
+
+# Environment Variables (NEVER commit these)
+.env
+.env.local
+.env.production
+.env.development
+client/.env
+client/.env.local
+client/.env.production
+server/.env
+server/.env.local
+server/.env.production
+
+# Node modules
+node_modules/
+client/node_modules/
+
+# Build outputs
+client/dist/
+client/build/
+
+# PHP Composer
+server/vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+attached_assets/
